@@ -1,0 +1,49 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class FrontendBackendIntegrationTest {
+
+    public static void main(String[] args) {
+        // Set the path to the ChromeDriver executable
+        System.setProperty("webdriver.chrome.driver", "/path/to/chromedriver");
+
+        // Initialize the WebDriver (assuming ChromeDriver)
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Define the URL of the frontend
+            String frontendUrl = "http://localhost:3000"; // Update this to your frontend URL
+
+            // Open the frontend application
+            driver.get(frontendUrl);
+
+            // Wait for the page to load (you may need to adjust the time based on your application's load time)
+            Thread.sleep(3000);
+
+            // Locate the element that displays the message returned by the backend
+            // Update the selector based on your frontend HTML structure
+            WebElement messageElement = driver.findElement(By.id("message")); // Assuming the element has id='message'
+
+            // Retrieve the displayed message
+            String displayedMessage = messageElement.getText();
+
+            // Define the expected message returned by the backend
+            String expectedMessage = "Hello from the backend!"; // Update this based on your backend response
+
+            // Verify that the frontend correctly displays the message returned by the backend
+            if (displayedMessage.equals(expectedMessage)) {
+                System.out.println("Test Passed: The frontend correctly displays the message returned by the backend.");
+            } else {
+                System.out.println("Test Failed: Expected '" + expectedMessage + "', but got '" + displayedMessage + "'");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Test Failed: " + e.getMessage());
+        } finally {
+            // Close the WebDriver
+            driver.quit();
+        }
+    }
+}

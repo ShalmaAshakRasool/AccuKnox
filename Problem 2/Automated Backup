@@ -1,0 +1,41 @@
+import os
+import boto3
+from botocore.exceptions import NoCredentialsError, ClientError
+from datetime import datetime
+import logging
+
+def upload_directory_to_s3(source_dir, bucket_name, s3_prefix):
+    s3 = boto3.client('s3')
+    try:
+        for root, dirs, files in os.walk(source_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                s3_key = os.path.join(s3_prefix, os.path.relpath(file_path, source_dir))
+                s3.upload_file(file_path, bucket_name, s3_key)
+        return "Success"
+    except NoCredentialsError:
+        return "Failure: Credentials not available"
+    except ClientError as e:
+        logging.error(e)
+        return f"Failure: {e}"
+
+def generate_report(status, log):
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    report_filename = f'backup_report_{timestamp}.txt'
+    
+    with open(report_filename, 'w') as report_file:
+        report_file.write(f"Backup Status: {status}\n")
+        report_file.write(f"Log:\n{log}\n")
+    
+    return report_filename
+
+if __name__ == "__main__":
+    source_directory = "/path/to/source_directory"
+    bucket_name = "your-s3-bucket-name"
+    s3_prefix = "backup"
+
+    status = upload_directory_to_s3(source_directory, bucket_name, s3_prefix)
+    log = f"Directory {source_directory} uploaded to s3://{bucket_name}/{s3_prefix}/"
+    report_file = generate_report(status, log)
+    
+    print(f"Backup {status}. Report saved to {report_file}")
